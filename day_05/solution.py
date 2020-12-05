@@ -15,25 +15,9 @@ def part_2(seats: List[str]) -> int:
 
 
 def parse_seat(seat: str) -> Tuple[int, int]:
-    row_min, row_max = 0, 127
-    col_min, col_max = 0, 7
-
-    for row_char in seat[:7]:
-        if row_char == 'F':
-            row_max = (row_min + row_max) // 2
-        elif row_char == 'B':
-            row_min = ((row_min + row_max) // 2) + 1
-
-    for col_char in seat[7:]:
-        if col_char == 'L':
-            col_max = (col_min + col_max) // 2
-        elif col_char == 'R':
-            col_min = ((col_min + col_max) // 2) + 1
-
-    assert row_min == row_max
-    assert col_min == col_max
-
-    return row_min, col_min
+    row = int(seat[:7].replace('F', '0').replace('B', '1'), 2)
+    col = int(seat[7:].replace('L', '0').replace('R', '1'), 2)
+    return row, col
 
 
 def get_id(row: int, col: int) -> int:
@@ -42,6 +26,6 @@ def get_id(row: int, col: int) -> int:
 
 if __name__ == '__main__':
     with open('day_05/input.txt', 'r') as f:
-        seats = f.readlines()
+        seats = [seat.strip() for seat in f]
         print(f'Highest seat ID: {part_1(seats)}')
         print(f'Your seat id: {part_2(seats)}')
