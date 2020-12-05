@@ -1,4 +1,4 @@
-from day_04.solution import parse, part_1, part_2, PREDICATES
+from day_04.solution import parse, part_1, part_2, VALIDATORS
 
 
 def test_part_1():
@@ -7,23 +7,23 @@ def test_part_1():
 
 
 def test_part_2_individual_examples():
-    assert PREDICATES['byr']('2002')
-    assert not PREDICATES['byr']('2003')
+    assert VALIDATORS['byr']('2002')
+    assert not VALIDATORS['byr']('2003')
 
-    assert PREDICATES['hgt']('60in')
-    assert PREDICATES['hgt']('190cm')
-    assert not PREDICATES['hgt']('190in')
-    assert not PREDICATES['hgt']('190')
+    assert VALIDATORS['hgt']('60in')
+    assert VALIDATORS['hgt']('190cm')
+    assert not VALIDATORS['hgt']('190in')
+    assert not VALIDATORS['hgt']('190')
 
-    assert PREDICATES['hcl']('#123abc')
-    assert not PREDICATES['hcl']('#123abz')
-    assert not PREDICATES['hcl']('123abc')
+    assert VALIDATORS['hcl']('#123abc')
+    assert not VALIDATORS['hcl']('#123abz')
+    assert not VALIDATORS['hcl']('123abc')
 
-    assert PREDICATES['ecl']('brn')
-    assert not PREDICATES['ecl']('wat')
+    assert VALIDATORS['ecl']('brn')
+    assert not VALIDATORS['ecl']('wat')
 
-    assert PREDICATES['pid']('000000001')
-    assert not PREDICATES['pid']('0123456789')
+    assert VALIDATORS['pid']('000000001')
+    assert not VALIDATORS['pid']('0123456789')
 
 
 def test_invalid_part_2():

@@ -7,8 +7,7 @@ COLOUR = re.compile(r'^#[\da-f]{6}$')
 EYES = {'amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'}
 PID = re.compile(r'^\d{9}$')
 
-
-PREDICATES: Dict[str, Callable[[str], bool]] = {
+VALIDATORS: Dict[str, Callable[[str], bool]] = {
         'byr': lambda x: 1920 <= int(x) <= 2002,
         'iyr': lambda x: 2010 <= int(x) <= 2020,
         'eyr': lambda x: 2020 <= int(x) <= 2030,
@@ -19,27 +18,21 @@ PREDICATES: Dict[str, Callable[[str], bool]] = {
     }
 
 
-
 def part_1(passports: List[Dict[str, str]]) -> int:
-    valid = 0
-    for passport in passports:
-        valid += int(all(field in passport for field in REQ))
-    return valid
+    f = lambda passport: int(all(field in passport for field in REQ))
+    return sum(map(f, passports))
 
 
 def part_2(passports: List[Dict[str, str]]) -> int:
-    valid = 0
-    for passport in passports:
-        valid += int(all(field in passport and PREDICATES[field](passport[field]) for field in PREDICATES))
-    return valid
+    f = lambda passport: int(all(field in passport and VALIDATORS[field](passport[field]) for field in REQ))
+    return sum(map(f, passports))
 
 
 def parse_height(height: str) -> bool:
     if len(height) < 3:
         return False
 
-    value = int(height[:-2])
-    units = height[-2:]
+    value, units = int(height[:-2]), height[-2:]
 
     if units == 'cm':
         return 150 <= value <= 193
