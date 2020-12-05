@@ -1,19 +1,18 @@
 import re
-from typing import List
+from typing import Callable, List, Tuple
 
 
-parser = re.compile(r'^(\d+)-(\d+) (\w): (\w+)$')
+PARSER = re.compile(r'^(\d+)-(\d+) (\w): (\w+)$')
 
 
 def part_1(passwords: List[str]) -> int:
     valid = 0
 
     for pw in passwords:
-        if match := parser.match(pw):
+        if match := PARSER.match(pw):
             low, high, char, text = match.groups()
             low, high = int(low), int(high)
-            if low <= text.count(char) <= high:
-                valid += 1
+            valid += int(low <= text.count(char) <= high)
 
     return valid
 
@@ -22,11 +21,10 @@ def part_2(passwords: List[str]) -> int:
     valid = 0
 
     for pw in passwords:
-        if match := parser.match(pw):
+        if match := PARSER.match(pw):
             first, second, char, text = match.groups()
             first, second = int(first) - 1, int(second) - 1
-            if (text[first] == char) ^ (text[second] == char):
-                valid += 1
+            valid += int((text[first] == char) ^ (text[second] == char))
 
     return valid
 
