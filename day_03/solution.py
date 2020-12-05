@@ -3,15 +3,8 @@ from typing import List
 
 
 def part_1(trees: List[List[int]], dx: int = 3, dy: int = 1) -> int:
-    x, y, tree_count = 0, 0, 0
     height, width = len(trees), len(trees[0])
-
-    while y < height:
-        tree_count += trees[y][x % width]
-        x += dx
-        y += dy
-
-    return tree_count
+    return sum(trees[y][(dx * i) % width] for i, y in enumerate(range(0, height, dy)))
 
 
 def part_2(trees: List[List[int]]) -> int:
@@ -23,7 +16,7 @@ def part_2(trees: List[List[int]]) -> int:
 def parse(filename: str) -> List[List[int]]:
     with open(filename, 'r') as f:
         values = {'#': 1, '.': 0}
-        return [[values[char] for char in line if char in values] for line in f]
+        return [list(map(values.get, line.strip())) for line in f]
 
 
 if __name__ == '__main__':
