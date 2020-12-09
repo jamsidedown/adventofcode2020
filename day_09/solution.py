@@ -14,7 +14,7 @@ def validate(sub: List[int], target: int) -> bool:
 
 def part_2(numbers: List[int], target: int) -> int:
     start, stop = 0, 1
-    while True:
+    while stop < len(numbers):
         cont_nums = numbers[start:stop]
         cont_sum = sum(cont_nums)
         if cont_sum == target:
@@ -23,8 +23,6 @@ def part_2(numbers: List[int], target: int) -> int:
             stop += 1
         if cont_sum > target:
             start += 1
-        if stop >= len(numbers):
-            break
     return 0
 
 
@@ -35,5 +33,6 @@ def parse(filename: str) -> List[int]:
 
 if __name__ == '__main__':
     numbers = parse('day_09/input.txt')
-    print(f'First number that isn\'t the sum of two of the previous 25 numbers: {part_1(numbers, 25)}')
-    print(f'Sum of largest and smallest values in a contiguous subset that sum to 257342611: {part_2(numbers, 257342611)}')
+    p1 = part_1(numbers, 25)
+    print(f'First number that isn\'t the sum of two of the previous 25 numbers: {p1}')
+    print(f'Sum of largest and smallest values in a contiguous subset that sum to {p1}: {part_2(numbers, p1)}')
