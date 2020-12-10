@@ -1,21 +1,13 @@
 from functools import lru_cache
-from typing import Iterator, List
+from typing import List
 
 
 def part_1(adapters: List[int]) -> int:
-    previous = 0
-    diffs = []
-
-    for current in adapters:
-        diffs.append(current - previous)
-        previous = current
-
-    return diffs.count(1) * (diffs.count(3) + 1)
+    diffs = [adapters[i] - adapters[i - 1] for i in range(1, len(adapters))]
+    return diffs.count(1) * diffs.count(3)
 
 
 def part_2(adapters: List[int]) -> int:
-    adapters = [0, *adapters, adapters[-1] + 3]
-
     @lru_cache
     def recurse(i: int) -> int:
         total = 0
@@ -30,7 +22,8 @@ def part_2(adapters: List[int]) -> int:
 
 def parse(filename: str) -> List[int]:
     with open(filename, 'r') as f:
-        return sorted(int(line) for line in f)
+        adapters = sorted(int(line) for line in f)
+        return [0, *adapters, adapters[-1] + 3]
 
 
 if __name__ == '__main__':
