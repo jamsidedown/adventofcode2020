@@ -1,32 +1,29 @@
-from typing import List
+from typing import Iterator, List
 
 
 class Tile:
-    def __init__(self, char: str, x: int, y: int, neighbour_limit: int):
+    def __init__(self, char: str, x: int, y: int, limit: int):
         self.seat = char in {'#', 'L'}
         self.occupied = char == '#'
-        self.previously_occupied = self.occupied
+        self.previous = self.occupied
         self.x = x
         self.y = y
         self.neighbours: List[Tile] = []
-        self.neighbour_limit = neighbour_limit
+        self.limit = limit
 
     @property
-    def _occupied_neighbours(self) -> int:
-        return sum(seat.previously_occupied for seat in self.neighbours)
+    def occ_neighbours(self) -> int:
+        return sum(seat.previous for seat in self.neighbours)
 
     def store(self):
-        self.previously_occupied = self.occupied
+        self.previous = self.occupied
 
     def update(self):
-        if self.previously_occupied:
-            self.occupied = self._occupied_neighbours < self.neighbour_limit
-        else:
-            self.occupied = self._occupied_neighbours == 0
+        self.occupied = self.occ_neighbours < self.limit if self.previous else self.occ_neighbours == 0
 
     @property
     def stable(self):
-        return self.occupied == self.previously_occupied
+        return self.occupied == self.previous
 
     @property
     def char(self):
@@ -44,13 +41,12 @@ class Grid:
         self.width = len(self.seats[0])
         for row in self.seats:
             for seat in row:
-                seat.neighbours = self.neighbours(seat) if immediate_neighbours else self.visible_neighbours(seat)
+                seat.neighbours = list(self.neighbours(seat) if immediate_neighbours else self.visible_neighbours(seat))
 
     def get(self, row: int, col: int) -> Tile:
         return self.seats[row][col]
 
-    def neighbours(self, seat: Tile) -> List[Tile]:
-        neighbours = []
+    def neighbours(self, seat: Tile) -> Iterator[Tile]:
         for dy in range(-1, 2):
             y = seat.y + dy
             if y < 0 or y >= self.height:
@@ -61,13 +57,10 @@ class Grid:
                     continue
                 if dx == 0 and dy == 0:
                     continue
-                tile = self.get(y, x)
-                if tile.seat:
-                    neighbours.append(tile)
-        return neighbours
+                if (tile := self.get(y, x)).seat:
+                    yield tile
 
-    def visible_neighbours(self, seat: Tile) -> List[Tile]:
-        neighbours = []
+    def visible_neighbours(self, seat: Tile) -> Iterator[Tile]:
         for dy in range(-1, 2):
             for dx in range(-1, 2):
                 if dx == 0 and dy == 0:
@@ -76,14 +69,11 @@ class Grid:
                 y = seat.y + dy
                 x = seat.x + dx
                 while 0 <= y < self.height and 0 <= x < self.width:
-                    tile = self.get(y, x)
-                    if tile.seat:
-                        neighbours.append(tile)
+                    if (tile := self.get(y, x)).seat:
+                        yield tile
                         break
                     y += dy
                     x += dx
-        return neighbours
-
 
     def step(self) -> None:
         for row in self.seats:
@@ -103,7 +93,7 @@ class Grid:
 
     @property
     def total(self):
-        return sum(sum(tile.previously_occupied for tile in row) for row in self.seats)
+        return sum(sum(tile.previous for tile in row) for row in self.seats)
 
     def pprint(self):
         print('')
