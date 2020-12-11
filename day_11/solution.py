@@ -1,126 +1,139 @@
 from typing import List
 
 
-def part_1(chairs: List[List[int]]) -> int:
-    occupied = [[0 for _ in range(len(chairs[0]))] for _ in range(len(chairs))]
-    steps = 0
-    while True:
-        new_occupied = part_1_step(chairs, occupied)
-        steps += 1
-        if new_occupied == occupied:
-            print(f'{steps} steps')
-            return sum(sum(row) for row in new_occupied)
-        occupied = new_occupied
+class Tile:
+    def __init__(self, char: str, x: int, y: int, neighbour_limit: int):
+        self.seat = char in {'#', 'L'}
+        self.occupied = char == '#'
+        self.previously_occupied = self.occupied
+        self.x = x
+        self.y = y
+        self.neighbours: List[Tile] = []
+        self.neighbour_limit = neighbour_limit
+
+    @property
+    def _occupied_neighbours(self) -> int:
+        return sum(seat.previously_occupied for seat in self.neighbours)
+
+    def store(self):
+        self.previously_occupied = self.occupied
+
+    def update(self):
+        if self.previously_occupied:
+            self.occupied = self._occupied_neighbours < self.neighbour_limit
+        else:
+            self.occupied = self._occupied_neighbours == 0
+
+    @property
+    def stable(self):
+        return self.occupied == self.previously_occupied
+
+    @property
+    def char(self):
+        if not self.seat:
+            return '.'
+        if self.occupied:
+            return '#'
+        return 'L'
 
 
-def part_1_step(chairs: List[List[int]], occupied: List[List[int]]) -> List[List[int]]:
-    new_occupied = []
-    height, width = len(chairs), len(chairs[0])
+class Grid:
+    def __init__(self, seats: List[str], immediate_neighbours: bool, neighbour_limit: int):
+        self.seats = [[Tile(char, x, y, neighbour_limit) for x, char in enumerate(row.strip())] for y, row in enumerate(seats)]
+        self.height = len(self.seats)
+        self.width = len(self.seats[0])
+        for row in self.seats:
+            for seat in row:
+                seat.neighbours = self.neighbours(seat) if immediate_neighbours else self.visible_neighbours(seat)
 
-    for y in range(height):
-        new_row = []
-        for x in range(width):
-            if not chairs[y][x]:
-                new_row.append(0)
-                continue
+    def get(self, row: int, col: int) -> Tile:
+        return self.seats[row][col]
 
-            seat = occupied[y][x]
-
-            neighbours = part_1_neighbour_count(occupied, y, x)
-            if seat:
-                new_row.append(int(neighbours < 4))
-            else:
-                new_row.append(int(neighbours == 0))
-
-        new_occupied.append(new_row)
-
-    return new_occupied
-
-
-def part_1_neighbour_count(chairs: List[List[int]], row: int, col: int) -> int:
-    count = 0
-    for y in range(max(row - 1, 0), min(row + 2, len(chairs))):
-        for x in range(max(col - 1, 0), min(col + 2, len(chairs[0]))):
-            if x == col and y == row:
-                continue
-            count += chairs[y][x]
-    return count
-
-
-def part_2(chairs: List[List[int]]) -> int:
-    occupied = [[0 for _ in range(len(chairs[0]))] for _ in range(len(chairs))]
-    steps = 0
-    while True:
-        new_occupied = part_2_step(chairs, occupied)
-        steps += 1
-        if new_occupied == occupied:
-            print(f'{steps} steps')
-            return sum(sum(row) for row in new_occupied)
-        occupied = new_occupied
-
-
-def part_2_step(chairs: List[List[int]], occupied: List[List[int]]) -> List[List[int]]:
-    new_occupied = []
-    height, width = len(chairs), len(chairs[0])
-
-    for y in range(height):
-        new_row = []
-        for x in range(width):
-            if not chairs[y][x]:
-                new_row.append(0)
-                continue
-
-            seat = occupied[y][x]
-
-            neighbours = part_2_neighbour_count(chairs, occupied, y, x)
-            if seat:
-                new_row.append(int(neighbours < 5))
-            else:
-                new_row.append(int(neighbours == 0))
-
-        new_occupied.append(new_row)
-
-    return new_occupied
-
-
-def part_2_neighbour_count(chairs: List[List[int]], occupied: List[List[int]], row: int, col: int) -> int:
-    count = 0
-    for dx in range(-1, 2):
+    def neighbours(self, seat: Tile) -> List[Tile]:
+        neighbours = []
         for dy in range(-1, 2):
-            if dx == 0 and dy == 0:
+            y = seat.y + dy
+            if y < 0 or y >= self.height:
                 continue
+            for dx in range(-1, 2):
+                x = seat.x + dx
+                if x < 0 or x >= self.width:
+                    continue
+                if dx == 0 and dy == 0:
+                    continue
+                tile = self.get(y, x)
+                if tile.seat:
+                    neighbours.append(tile)
+        return neighbours
 
-            y = row + dy
-            x = col + dx
-            while 0 <= y < len(chairs) and 0 <= x < len(chairs[0]):
-                if chairs[y][x]:
-                    count += occupied[y][x]
-                    break
-                y += dy
-                x += dx
-    return count
+    def visible_neighbours(self, seat: Tile) -> List[Tile]:
+        neighbours = []
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                if dx == 0 and dy == 0:
+                    continue
+
+                y = seat.y + dy
+                x = seat.x + dx
+                while 0 <= y < self.height and 0 <= x < self.width:
+                    tile = self.get(y, x)
+                    if tile.seat:
+                        neighbours.append(tile)
+                        break
+                    y += dy
+                    x += dx
+        return neighbours
 
 
-def pprint(chairs: List[List[int]], occupied: List[List[int]]) -> None:
-    for y in range(len(chairs)):
-        line = ''
-        for x in range(len(chairs[0])):
-            if not chairs[y][x]:
-                line += '.'
-            elif occupied[y][x]:
-                line += '#'
-            else:
-                line += 'L'
-        print(line)
-    print('')
+    def step(self) -> None:
+        for row in self.seats:
+            for tile in row:
+                if not tile.seat:
+                    continue
+                tile.update()
+
+    def store(self):
+        for row in self.seats:
+            for tile in row:
+                tile.store()
+
+    @property
+    def stable(self) -> bool:
+        return all(seat.stable for row in self.seats for seat in row)
+
+    @property
+    def total(self):
+        return sum(sum(tile.previously_occupied for tile in row) for row in self.seats)
+
+    def pprint(self):
+        print('')
+        for y in range(self.height):
+            print(''.join(self.get(y, x).char for x in range(self.width)))
+        print('')
+
+    def run(self):
+        while True:
+            self.step()
+            if self.stable:
+                return self.total
+            self.store()
 
 
-def parse(filename: str) -> List[List[int]]:
+def part_1(filename: str) -> int:
+    return parse(filename, True, 4).run()
+
+
+def part_2(filename: str) -> int:
+    return parse(filename, False, 5).run()
+
+
+def parse(filename: str, immediate_neighbours: bool, neighbour_limit: int) -> Grid:
     with open(filename, 'r') as f:
-        return [[int(char == 'L' or char == '#') for char in line.strip()] for line in f]
+        return Grid(f.readlines(), immediate_neighbours, neighbour_limit)
 
 
 if __name__ == '__main__':
-    chairs = parse('day_11/input.txt')
-    print(f'Occupied seats once settled: {part_1(chairs)}')
-    print(f'Occupied seats once resettled: {part_2(chairs)}')
+    p1 = part_1('day_11/input.txt')
+    print(f'Occupied seats once settled: {p1}')
+    p2 = part_2('day_11/input.txt')
+    print(f'Occupied seats once resettled: {p2}')
