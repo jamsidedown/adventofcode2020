@@ -1,4 +1,4 @@
-from math import log, log10
+from math import ceil, log, log10, prod, sqrt
 from typing import Iterator, List, Tuple, Union
 
 
@@ -23,45 +23,22 @@ def part_1(timestamp: int, buses: List[Bus]):
         t += 1
 
 
-def part_2_old(buses: List[Bus]) -> int:
+def part_2(buses: List[Bus]) -> int:
     first = buses[0]
     timestamp = 0
-    while True:
-        timestamp += first.id
-        success = True
-        for bus in buses[1:]:
-            if not (timestamp + bus.offset) % bus.id == 0:
-                success = False
-                break
-        if success:
-            return timestamp
-
-
-def part_2(buses: List[Bus]) -> int:
-    buses = sorted(buses, key=lambda b: b.id, reverse=True)
-
-    for bus in buses:
-        bus.offset = bus.offset % bus.id
-
-    first = buses[0]
-    counter = 1
-
-    ln = 1
+    jump = first.id
+    offset = 1
 
     while True:
-        timestamp = (first.id * counter) - first.offset
-        if new_ln := int(log(timestamp)):
-            if new_ln > ln:
-                ln = new_ln
-                print(new_ln)
-        success = True
-        for bus in buses[1:]:
-            if not (timestamp + bus.offset) % bus.id == 0:
-                success = False
+        timestamp += jump
+        for bus in buses[offset:]:
+            if (timestamp + bus.offset) % bus.id == 0:
+                offset += 1
+                jump *= bus.id
+                if offset == len(buses):
+                    return timestamp
+            else:
                 break
-        if success:
-            return timestamp
-        counter += 1
 
 
 def parse(filename: str) -> Tuple[int, List[Bus]]:

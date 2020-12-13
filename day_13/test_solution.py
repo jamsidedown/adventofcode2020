@@ -10,21 +10,15 @@ def test_part_2_example_1():
     buses = list(Bus.parse('17,x,13,19'))
     assert part_2(buses) == 3417
 
-# x % 17 == (x + 2) % 13 == (x + 3) % 19 == 0
 
-# (3417 + 0) % 17 == 0
-# 3417 % 17 == 0
+def test_part_2_mini_example():
+    buses = list(Bus.parse('17,x,13'))
+    assert part_2(buses) == 102
+    buses = list(Bus.parse('17,19'))
+    assert part_2(buses) == 170
 
-# 17x = 13y - 2 = 19z - 3
-# x := 201
-# y = 263
-# z = 180
-
-# (3417 + 2) % 13 == 0
-# 3417 % 13 == (13 - 2) % 13
-
-# (3417 + 3) % 19 == 0
-# 3417 % 19 == (19 - 3) % 19
+# 102 = 0 mod 17
+# 102 = 11 mod 13
 
 
 def test_part_2_full():
