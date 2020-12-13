@@ -32,13 +32,12 @@ def part_2(buses: List[Bus]) -> int:
     while True:
         timestamp += jump
         for bus in buses[offset:]:
-            if (timestamp + bus.offset) % bus.id == 0:
-                offset += 1
-                jump *= bus.id
-                if offset == len(buses):
-                    return timestamp
-            else:
+            if (timestamp + bus.offset) % bus.id != 0:
                 break
+            offset += 1
+            jump *= bus.id
+            if offset == len(buses):
+                return timestamp
 
 
 def parse(filename: str) -> Tuple[int, List[Bus]]:
