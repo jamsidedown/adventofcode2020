@@ -4,6 +4,7 @@ from typing import Dict, List
 def part_1(input: List[int]) -> int:
     return nth_number(input, 2020)
 
+
 def part_2(input: List[int]) -> int:
     return nth_number(input, 30_000_000)
 
