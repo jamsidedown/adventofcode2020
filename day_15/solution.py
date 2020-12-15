@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 
 def part_1(input: List[int]) -> int:
@@ -10,29 +10,18 @@ def part_2(input: List[int]) -> int:
 
 
 def nth_number(input: List[int], n: int) -> int:
-    spoken: Dict[int, List[int]] = {0: []}
+    spoken = {value: index for index, value in enumerate(input)}
     last = 0
 
-    for index, value in enumerate(input):
-        spoken[value] = [index]
-        last = value
-
-    zero = spoken[0]
-    history = spoken[last]
-
-    for index in range(len(input), n):
-        if len(history) == 1:
-            last = 0
-            zero.append(index)
-            history = zero
-        else:
-            last = history[-1] - history[-2]
-            history = spoken.setdefault(last, [])
-            history.append(index)
+    for index in range(len(input), n - 1):
+        last_index = spoken.get(last, index)
+        spoken[last] = index
+        last = index - last_index
 
     return last
 
 
 if __name__ == '__main__':
-    print(f'2020th number spoken: {part_1([0, 1, 4, 13, 15, 12, 16])}')
-    print(f'30 millionth number spoken: {part_2([0, 1, 4, 13, 15, 12, 16])}')
+    input = [0, 1, 4, 13, 15, 12, 16]
+    print(f'2020th number spoken: {part_1(input)}')
+    print(f'30 millionth number spoken: {part_2(input)}')
