@@ -16,16 +16,18 @@ def nth_number(input: List[int], n: int) -> int:
         spoken[value] = [index]
         last = value
 
+    zero = spoken[0]
+    history = spoken[last]
+
     for index in range(len(input), n):
-        history = spoken[last]
         if len(history) == 1:
             last = 0
-            spoken[last].append(index)
+            zero.append(index)
+            history = zero
         else:
             last = history[-1] - history[-2]
-            sub = spoken.get(last, [])
-            sub.append(index)
-            spoken[last] = sub
+            history = spoken.setdefault(last, [])
+            history.append(index)
 
     return last
 
