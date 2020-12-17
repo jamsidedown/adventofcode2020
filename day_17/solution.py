@@ -15,10 +15,14 @@ class HyperCubes:
     def step(self):
         new_cubes = self.cubes.copy()
         sw, sz, sy, sx = self.cubes.shape
-        for w in range(sw):
-            for z in range(sz):
-                for y in range(sy):
-                    for x in range(sx):
+        w_nz = [i for i in range(sw) if self.cubes[i, :, :, :].sum() > 0]
+        z_nz = [i for i in range(sz) if self.cubes[:, i, :, :].sum() > 0]
+        y_nz = [i for i in range(sy) if self.cubes[:, :, i, :].sum() > 0]
+        x_nz = [i for i in range(sx) if self.cubes[:, :, :, i].sum() > 0]
+        for w in range(w_nz[0] - 1, w_nz[-1] + 2):
+            for z in range(z_nz[0] - 1, z_nz[-1] + 2):
+                for y in range(y_nz[0] - 1, y_nz[-1] + 2):
+                    for x in range(x_nz[0] - 1, x_nz[-1] + 2):
                         current = new_cubes[w, z, y, x]
                         n = self.neighbours(x, y, z, w)
                         if current == 1:
@@ -69,9 +73,12 @@ class Cubes:
     def step(self):
         new_cubes = self.cubes.copy()
         sz, sy, sx = self.cubes.shape
-        for z in range(sz):
-            for y in range(sy):
-                for x in range(sx):
+        z_nz = [i for i in range(sz) if self.cubes[i, :, :].sum() > 0]
+        y_nz = [i for i in range(sy) if self.cubes[:, i, :].sum() > 0]
+        x_nz = [i for i in range(sx) if self.cubes[:, :, i].sum() > 0]
+        for z in range(z_nz[0] - 1, z_nz[-1] + 2):
+            for y in range(y_nz[0] - 1, y_nz[-1] + 2):
+                for x in range(x_nz[0] - 1, x_nz[-1] + 2):
                     current = new_cubes[z, y, x]
                     n = self.neighbours(x, y, z)
                     if current == 1:
