@@ -1,6 +1,6 @@
 from collections import deque
 from functools import lru_cache
-from typing import Deque, Tuple
+from typing import Deque, Dict, Tuple
 
 
 class HDeque(deque):
@@ -35,13 +35,21 @@ def part_2(player_1: Deque[int], player_2: Deque[int]) -> int:
     return calculate_score(winner)
 
 
-@lru_cache
-def play_game(player_1: Deque[int], player_2: Deque[int]) -> bool:
-    rounds = set()
+game_results: Dict[str, bool] = {}
 
+def play_game(player_1: Deque[int], player_2: Deque[int]) -> bool:
+    game = f'{str(player_1)};{str(player_2)}'
+    if game in game_results:
+        print('game ended by caching')
+        print(len(game_results))
+        return game_results[game]
+
+    rounds = set()
     while player_1 and player_2:
         round = f'{str(player_1)};{str(player_2)}'
         if round in rounds:
+            game_results[game] = True
+            print('game ended by repeated round')
             return True
         rounds.add(round)
 
@@ -62,7 +70,10 @@ def play_game(player_1: Deque[int], player_2: Deque[int]) -> bool:
             player_2.append(second)
             player_2.append(first)
 
-    return len(player_1) > len(player_2)
+    player_1_wins = len(player_1) > len(player_2)
+    # print('game ended by getting all cards')
+    game_results[game] = player_1_wins
+    return player_1_wins
 
 
 def parse(filename: str) -> Tuple[Deque[int], Deque[int]]:
