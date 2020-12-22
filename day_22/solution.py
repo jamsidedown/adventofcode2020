@@ -1,84 +1,67 @@
-from collections import deque
-from functools import lru_cache
-from typing import Deque, Dict, Tuple
+from typing import Dict, List, Tuple
 
 
-class HDeque(deque):
-    def __hash__(self) -> int:
-        return hash(str(self))
-
-
-def part_1(player_1: Deque[int], player_2: Deque[int]) -> int:
+def part_1(player_1: List[int], player_2: List[int]) -> int:
     while player_1 and player_2:
-        first = player_1.popleft()
-        second = player_2.popleft()
+        first, second = player_1[0], player_2[0]
+        player_1, player_2 = player_1[1:], player_2[1:]
+
         if first > second:
-            player_1.append(first)
-            player_1.append(second)
+            player_1 += [first, second]
         else:
-            player_2.append(second)
-            player_2.append(first)
+            player_2 += [second, first]
 
     winner = player_1 if player_1 else player_2
     return calculate_score(winner)
 
 
-def calculate_score(cards: Deque[int]) -> int:
+def calculate_score(cards: List[int]) -> int:
     length = len(cards)
-    return sum(cards.popleft() * (length - i) for i in range(length))
+    return sum(cards[i] * (length - i) for i in range(length))
 
 
-def part_2(player_1: Deque[int], player_2: Deque[int]) -> int:
-    p1, p2 = HDeque(player_1), HDeque(player_2)
-    player_1_wins = play_game(p1, p2)
-    winner = p1 if player_1_wins else p2
+def part_2(player_1: List[int], player_2: List[int]) -> int:
+    player_1, player_2, player_1_wins = play_game(player_1, player_2)
+    winner = player_1 if player_1_wins else player_2
     return calculate_score(winner)
 
 
 game_results: Dict[str, bool] = {}
 
-def play_game(player_1: Deque[int], player_2: Deque[int]) -> bool:
+def play_game(player_1: List[int], player_2: List[int]) -> Tuple[List[int], List[int], bool]:
     game = f'{str(player_1)};{str(player_2)}'
     if game in game_results:
-        print('game ended by caching')
-        print(len(game_results))
-        return game_results[game]
+        return player_1, player_2, game_results[game]
 
     rounds = set()
     while player_1 and player_2:
         round = f'{str(player_1)};{str(player_2)}'
         if round in rounds:
             game_results[game] = True
-            print('game ended by repeated round')
-            return True
+            return player_1, player_2, True
         rounds.add(round)
 
-        first = player_1.popleft()
-        second = player_2.popleft()
-
-        player_1_wins = True
+        first, second = player_1[0], player_2[0]
+        player_1, player_2 = player_1[1:], player_2[1:]
 
         if len(player_1) >= first and len(player_2) >= second:
-            player_1_wins = play_game(HDeque(player_1), HDeque(player_2))
+            _, _, player_1_wins = play_game(player_1[0:first], player_2[0:second])
         else:
             player_1_wins = first > second
 
         if player_1_wins:
-            player_1.append(first)
-            player_1.append(second)
+            player_1 += [first, second]
         else:
-            player_2.append(second)
-            player_2.append(first)
+            player_2 += [second, first]
 
     player_1_wins = len(player_1) > len(player_2)
-    # print('game ended by getting all cards')
     game_results[game] = player_1_wins
-    return player_1_wins
+    return player_1, player_2, player_1_wins
 
 
-def parse(filename: str) -> Tuple[Deque[int], Deque[int]]:
+def parse(filename: str) -> Tuple[List[int], List[int]]:
     with open(filename, 'r') as f:
-        return (deque(int(card.strip()) for card in deck.splitlines()[1:]) for deck in f.read().split('\n\n'))
+        return (list(int(card.strip()) for card in deck.splitlines()[1:]) for deck in f.read().split('\n\n'))
 
 
 if __name__ == '__main__':
