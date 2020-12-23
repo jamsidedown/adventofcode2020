@@ -5,7 +5,6 @@ class Node:
     def __init__(self, value: int):
         self.value = value
         self.next: 'Node' = None
-        self.prev: 'Node' = None
 
     def __repr__(self) -> str:
         return f'Node({self.value})'
@@ -19,13 +18,11 @@ class CLL:
         for n in nodes:
             node = Node(n)
             self.lookup[n] = node
-            node.prev = current
             if current:
                 current.next = node
             else:
                 first = node
             current = node
-        first.prev = current
         current.next = first
         self.current = first
 
@@ -44,26 +41,22 @@ class CLL:
 
     def pop(self, node: Node, count: int) -> List[Node]:
         popped = []
-        current_node = node
+        start = node
+        current_node = node.next
         for _ in range(count):
             popped.append(current_node)
             next_node = current_node.next
-            prev_node = current_node.prev
-            next_node.prev = prev_node
-            prev_node.next = next_node
             current_node.next = None
-            current_node.prev = None
             current_node = next_node
+            start.next = current_node
         return popped
 
     def insert(self, target: Node, nodes: List[Node]) -> None:
         current = target
         next_node = current.next
         for node in nodes:
-            node.prev = current
             node.next = next_node
             current.next = node
-            next_node.prev = node
             current = node
 
 
@@ -81,7 +74,7 @@ def play(cups: List[int], moves: int) -> List[int]:
         if mi > 0 and mi % 1_000_000 == 0:
             print(f'{mi:_}')
         current = cll.current
-        pick_up = cll.pop(current.next, 3)
+        pick_up = cll.pop(current, 3)
 
         destination = (current.value - 1) % max_cup or max_cup
         while destination in {cup.value for cup in pick_up}:
