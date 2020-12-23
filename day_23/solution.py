@@ -41,23 +41,16 @@ class CLL:
 
     def pop(self, node: Node, count: int) -> List[Node]:
         popped = []
-        start = node
-        current_node = node.next
+        start, current = node, node.next
         for _ in range(count):
-            popped.append(current_node)
-            next_node = current_node.next
-            current_node.next = None
-            current_node = next_node
-            start.next = current_node
+            popped.append(current)
+            current = current.next
+        start.next = current
         return popped
 
     def insert(self, target: Node, nodes: List[Node]) -> None:
-        current = target
-        next_node = current.next
-        for node in nodes:
-            node.next = next_node
-            current.next = node
-            current = node
+        nodes[-1].next = target.next
+        target.next = nodes[0]
 
 
 def part_1(cups: List[int], moves: int) -> str:
