@@ -50,9 +50,7 @@ def part_2(filename: str) -> int:
 
     definite_columns = {}
 
-    while True:
-        if len(potential_columns) == 0:
-            break
+    while potential_columns:
         for field in potential_columns:
             columns = potential_columns[field]
             if len(columns) == 1:
