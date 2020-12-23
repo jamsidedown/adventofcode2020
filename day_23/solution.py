@@ -61,13 +61,13 @@ class CLL:
 
 
 def part_1(cups: List[int], moves: int) -> str:
-    cups = play(cups, moves)
-    oi = cups.index(1)
-    result = cups[oi + 1:] + cups[0:oi]
-    return ''.join(str(x) for x in result)
+    cll = play(cups, moves)
+    cll.next()
+    icll = iter(cll)
+    return ''.join(str(next(icll)) for _ in range(len(cups) - 1))
 
 
-def play(cups: List[int], moves: int) -> List[int]:
+def play(cups: List[int], moves: int) -> CLL:
     max_cup = max(cups)
     cll = CLL(cups)
     for mi in range(moves):
@@ -85,15 +85,16 @@ def play(cups: List[int], moves: int) -> List[int]:
         cll.next()
 
     cll.current = cll.find(1)
-    return list(cll)
+    return cll
 
 
 def part_2(cups: List[int], moves: int) -> int:
     max_cup = max(cups)
     cups += list(range(max_cup + 1, 1_000_001))
-    cups = play(cups, moves)
-    one = cups.index(1)
-    return cups[one + 1] * cups[one + 2]
+    cll = play(cups, moves)
+    cll.next()
+    icll = iter(cll)
+    return next(icll) * next(icll)
 
 
 def parse(input: str) -> List[int]:
